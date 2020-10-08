@@ -10,8 +10,11 @@ CREATE TABLE department (
 
     PRIMARY KEY(id)
 );
+-- Starts department at id #100
+ALTER TABLE department AUTO_INCREMENT=100;
 
-CREATE TABLE role (
+
+CREATE TABLE `role` (
     id INT NOT NULL AUTO_INCREMENT, 
     title VARCHAR(30) NOT NULL,
     salary DECIMAL(15,2) NOT NULL,
@@ -29,5 +32,9 @@ CREATE TABLE employee (
     manager_id INT NULL,
 
     PRIMARY KEY(id),
+    
     FOREIGN KEY(role_id) REFERENCES role(id)
 );
+
+-- starts employees id numbers at 1000
+ALTER TABLE employee AUTO_INCREMENT=1000;
