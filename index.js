@@ -93,31 +93,60 @@ function viewEmployees() {
 }
 
 function addEmployee() {
-    connection.query('SELECT * FROM role', (err, res) => {
-        // console.log(res);
+    connection.query(`SELECT employee.id as employee_id, concat(employee.first_name,' ',employee.last_name) as full_name,role.id as role_id, role.title FROM employee LEFT JOIN role on employee.role_id = role.id;`, (err, res) => {
         if (err) throw err;
 
         let empChoices = res.map(title => title.title);
-        let manager =
+        let managerChoices = res.map(name => name.full_name);
+        const response1 = res;
 
-            inquirer.prompt([{
-                name: 'firstName',
-                type: 'input',
-                message: 'What is the employees first name?'
-            }, {
-                name: 'lastName',
-                type: 'input',
-                message: 'What is the employees last name?'
-            }, {
-                name: 'employeeRole',
-                type: 'list',
-                message: 'What is the employees role?',
-                choices: empChoices
-            }, {
-                name: 'manager',
-            }]).then(({ firstName, lastName, employeeRole }) => {
-                console.log(firstName, lastName, employeeRole);
+        inquirer.prompt([{
+            name: 'firstName',
+            type: 'input',
+            message: 'What is the employees first name?'
+        }, {
+            name: 'lastName',
+            type: 'input',
+            message: 'What is the employees last name?'
+        }, {
+            name: 'employeeRole',
+            type: 'list',
+            message: 'What is the employees role?',
+            choices: empChoices
+        }, {
+            name: 'manager',
+            type: 'list',
+            message: 'Who is the manager for the new employee?',
+            choices: managerChoices
+
+        }]).then(({ firstName, lastName, employeeRole, manager }) => {
+            // console.log(response1);
+
+            let newEmpId = response1.filter(value => employeeRole === value.title);
+            newEmpId = (newEmpId[0].role_id);
+
+            let newEmpManagerId = response1.filter(name => manager === name.full_name);
+            newEmpManagerId = (newEmpManagerId[0].employee_id);
+            // console.log(newEmpManagerId)
+            // console.log(newEmpId);
+
+            const newEmployee = {
+                first_name: firstName,
+                last_name: lastName,
+                role_id: newEmpId,
+                manager_id: newEmpManagerId
+            };
+
+            connection.query('INSERT INTO employee SET ?', newEmployee, err => {
+                if (err) throw err;
+
+                console.log(`\n✨ Your new employee ${firstName} ${lastName} was created! ✨`);
+
+                start();
             })
+
+
+        })
     })
 
 }
