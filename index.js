@@ -32,12 +32,12 @@ function start() {
             'View Employees By Department',
             'View Employees By Manager',
             'Add Employee',
-            'Remove Employee',
+            'Delete An Employee',
             'Update Employee Role',
             'Update Employee Manager',
             'Exit'
         ]
-    }
+    };
 
     inquirer.prompt(promptData).then(handleRespose);
 }
@@ -49,7 +49,7 @@ function handleRespose(answers) {
             break;
 
         case 'View Employees By Department':
-            console.log('view emp by dept')
+            viewEmpByDept();
             break;
 
         case 'View Employees By Manager':
@@ -60,8 +60,8 @@ function handleRespose(answers) {
             addEmployee();
             break;
 
-        case 'Remove Employee':
-            console.log('remove emp');
+        case 'Delete An Employee':
+            deleteEmployee();
             break;
 
         case 'Update Employee Role':
@@ -92,6 +92,10 @@ function viewEmployees() {
     });
 }
 
+function viewEmpByDept() {
+
+}
+
 function addEmployee() {
     connection.query(`SELECT employee.id as employee_id, concat(employee.first_name,' ',employee.last_name) as full_name,role.id as role_id, role.title FROM employee LEFT JOIN role on employee.role_id = role.id;`, (err, res) => {
         if (err) throw err;
@@ -120,15 +124,12 @@ function addEmployee() {
             choices: managerChoices
 
         }]).then(({ firstName, lastName, employeeRole, manager }) => {
-            // console.log(response1);
 
             let newEmpId = response1.filter(value => employeeRole === value.title);
             newEmpId = (newEmpId[0].role_id);
 
             let newEmpManagerId = response1.filter(name => manager === name.full_name);
             newEmpManagerId = (newEmpManagerId[0].employee_id);
-            // console.log(newEmpManagerId)
-            // console.log(newEmpId);
 
             const newEmployee = {
                 first_name: firstName,
@@ -140,13 +141,40 @@ function addEmployee() {
             connection.query('INSERT INTO employee SET ?', newEmployee, err => {
                 if (err) throw err;
 
-                console.log(`\n✨ Your new employee ${firstName} ${lastName} was created! ✨`);
+                console.log(`\n✨ Your new employee ${firstName} ${lastName} was created! ✨\n`);
+
+                start();
+            });
+        });
+    });
+
+}
+
+function deleteEmployee() {
+    connection.query(`SELECT employee.id, concat(employee.first_name,' ',employee.last_name) AS whole_name, employee.role_id, employee.manager_id FROM corporate_db.employee;`, (err, res) => {
+        if (err) throw err;
+
+        let employeeToDelete = res.map(name => name.whole_name);
+        let deleteResponse = res;
+        console.log('here are all the employees', employeeToDelete);
+
+        inquirer.prompt([{
+            name: 'empName',
+            type: 'list',
+            message: 'Select an Employee to delete',
+            choices: employeeToDelete
+        }]).then(({ empName }) => {
+            console.log('this is the employee name', empName);
+            const employeeToBeDeleted = deleteResponse.filter(name => name.whole_name === empName);
+            const employeeIdToDelete = employeeToBeDeleted[0].id;
+
+            connection.query('DELETE FROM employee WHERE id=?', employeeIdToDelete, err => {
+                if (err) throw err;
+
+                console.log(`\n✨ Your employee ${empName} was deleted! ✨\n`);
 
                 start();
             })
-
-
         })
     })
-
 }
