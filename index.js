@@ -32,6 +32,7 @@ function start() {
             'View Employees By Department',
             'View Employees By Manager',
             'Add Employee',
+            'Add Department',
             'Delete An Employee',
             'Update Employee Role',
             'Update Employee Manager',
@@ -58,6 +59,10 @@ function handleRespose(answers) {
 
         case 'Add Employee':
             addEmployee();
+            break;
+
+        case 'Add Department':
+            addDepartment();
             break;
 
         case 'Delete An Employee':
@@ -150,13 +155,33 @@ function addEmployee() {
 
 }
 
+function addDepartment() {
+    connection.query('SELECT * FROM corporate_db.department', (err, res) => {
+        if (err) throw err;
+
+        inquirer.prompt([{
+            name: 'addDepartment',
+            type: 'input',
+            message: 'What department would you like to add?'
+        }]).then(({ addDepartment }) => {
+            let newDepartment = { name: addDepartment };
+            connection.query('INSERT INTO department SET ?', newDepartment, (err, res) => {
+                if (err) throw err;
+
+                console.log(`\n✨ Your department ${addDepartment} was created! ✨\n`);
+
+                start();
+            })
+        })
+    })
+}
+
 function deleteEmployee() {
     connection.query(`SELECT employee.id, concat(employee.first_name,' ',employee.last_name) AS whole_name, employee.role_id, employee.manager_id FROM corporate_db.employee;`, (err, res) => {
         if (err) throw err;
 
         let employeeToDelete = res.map(name => name.whole_name);
         let deleteResponse = res;
-        console.log('here are all the employees', employeeToDelete);
 
         inquirer.prompt([{
             name: 'empName',
