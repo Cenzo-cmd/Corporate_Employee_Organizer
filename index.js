@@ -57,7 +57,7 @@ function handleRespose(answers) {
             break;
 
         case 'Add Employee':
-            console.log('add emp');
+            addEmployee();
             break;
 
         case 'Remove Employee':
@@ -81,4 +81,43 @@ function handleRespose(answers) {
             console.log('Connection ending');
             connection.end();
     }
+}
+
+function viewEmployees() {
+    connection.query('SELECT * FROM employee', (err, res) => {
+        if (err) throw err;
+        const table = cTable.getTable(res);
+        console.log(table);
+        start();
+    });
+}
+
+function addEmployee() {
+    connection.query('SELECT * FROM role', (err, res) => {
+        // console.log(res);
+        if (err) throw err;
+
+        let empChoices = res.map(title => title.title);
+        let manager =
+
+            inquirer.prompt([{
+                name: 'firstName',
+                type: 'input',
+                message: 'What is the employees first name?'
+            }, {
+                name: 'lastName',
+                type: 'input',
+                message: 'What is the employees last name?'
+            }, {
+                name: 'employeeRole',
+                type: 'list',
+                message: 'What is the employees role?',
+                choices: empChoices
+            }, {
+                name: 'manager',
+            }]).then(({ firstName, lastName, employeeRole }) => {
+                console.log(firstName, lastName, employeeRole);
+            })
+    })
+
 }
