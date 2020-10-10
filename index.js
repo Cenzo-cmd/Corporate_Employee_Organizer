@@ -32,8 +32,11 @@ function start() {
             'View Employees By Department',
             'View Employees By Manager',
             'Add Employee',
+            'Add A Job Role',
             'Add Department',
             'Delete An Employee',
+            'Delete An Emoloyee Role',
+            'Delete A Department',
             'Update Employee Role',
             'Update Employee Manager',
             'Exit'
@@ -61,12 +64,24 @@ function handleRespose(answers) {
             addEmployee();
             break;
 
+        case 'Add A Job Role':
+            addRole();
+            break;
+
         case 'Add Department':
             addDepartment();
             break;
 
         case 'Delete An Employee':
             deleteEmployee();
+            break;
+
+        case 'Delete An Emoloyee Role':
+            deleteRole();
+            break;
+
+        case 'Delete A Department':
+            deleteDepartment();
             break;
 
         case 'Update Employee Role':
@@ -155,6 +170,50 @@ function addEmployee() {
 
 }
 
+function addRole() {
+    connection.query(`SELECT * FROM corporate_db.department;`, (err, res) => {
+        if (err) throw err;
+        let departments = res.map(name => name.name);
+        let response3 = res;
+        console.log(response3);
+
+        inquirer.prompt([{
+            name: 'roleTitle',
+            type: 'input',
+            message: `What is the rolels title?`
+        }, {
+            name: 'roleSalary',
+            type: 'number',
+            message: 'What is the salary for this role?'
+        }, {
+            name: 'roleDepartment',
+            type: 'list',
+            message: 'Which department is the role in?',
+            choices: departments
+        }]).then(({ roleTitle, roleSalary, roleDepartment }) => {
+
+            let departmentId = response3.filter(dept => roleDepartment === dept.name);
+            departmentId = departmentId[0].id;
+            console.log(departmentId);
+            let newRole = {
+                title: roleTitle,
+                salary: roleSalary,
+                department_id: departmentId
+            };
+
+            connection.query('INSERT INTO role set ?', newRole, (err, res) => {
+                if (err) throw err;
+
+                console.log(`\n✨ Your new role ${roleTitle} was created! ✨\n`);
+
+                start();
+            })
+        })
+
+
+    })
+}
+
 function addDepartment() {
     connection.query('SELECT * FROM corporate_db.department', (err, res) => {
         if (err) throw err;
@@ -201,5 +260,57 @@ function deleteEmployee() {
                 start();
             })
         })
+    })
+}
+
+function deleteRole() {
+    connection.query('SELECT * FROM corporate_db.role', (err, res) => {
+        if (err) throw err;
+
+        let positionTitle = res.map(title => title.title);
+
+
+        inquirer.prompt([{
+            name: 'jobTitle',
+            type: 'list',
+            message: 'Which employee role would you like to delete?',
+            choices: positionTitle
+        }]).then(({ jobTitle }) => {
+            // console.log(jobTitle);
+            // console.log(res);
+            let filteredTitles = res.filter(title => jobTitle === title.title);
+            let titleIdToDelte = filteredTitles[0].id;
+
+            connection.query('DELETE FROM role WHERE id=?', titleIdToDelte, err => {
+                if (err) throw err;
+                console.log(`\n✨ The employee role ${jobTitle} was deleted! ✨\n`);
+                start();
+            })
+
+        })
+    })
+}
+
+function deleteDepartment() {
+    connection.query('SELECT * FROM corporate_db.department', (err, res) => {
+        if (err) throw err;
+        let departmentChoices = res.map(dept => dept.name);
+
+        inquirer.prompt([{
+            name: 'departmentName',
+            type: 'list',
+            message: 'Which department would you like to delete?',
+            choices: departmentChoices
+        }]).then(({ departmentName }) => {
+            const filteredDept = res.filter(dept => departmentName === dept.name);
+            const departmentId = filteredDept[0].id;
+
+            connection.query('DELETE FROM department WHERE id=?', departmentId, err => {
+                if (err) throw err;
+                console.log(`\n✨ The department ${departmentName} was deleted! ✨\n`);
+                start();
+            })
+        })
+
     })
 }
