@@ -53,7 +53,7 @@ function handleRespose(answers) {
             break;
 
         case 'View Employees By Department':
-            viewEmpByDept();
+            // viewEmpByDept();
             break;
 
         case 'View Employees By Manager':
@@ -85,11 +85,11 @@ function handleRespose(answers) {
             break;
 
         case 'Update Employee Role':
-            console.log('update emp role');
+            updateEmployeeRole();
             break;
 
         case 'Update Employee Manager':
-            console.log('update emp manager');
+            // updateEmpManager();
             break;
 
         case 'Exit':
@@ -104,7 +104,10 @@ function handleRespose(answers) {
 }
 
 function viewEmployees() {
-    connection.query('SELECT * FROM employee', (err, res) => {
+    connection.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name as Department, role.salary 
+    FROM employee 
+    LEFT JOIN role on employee.role_id = role.id
+    LEFT JOIN department on role.department_id = department.id;`, (err, res) => {
         if (err) throw err;
         const table = cTable.getTable(res);
         console.log(table);
@@ -269,15 +272,12 @@ function deleteRole() {
 
         let positionTitle = res.map(title => title.title);
 
-
         inquirer.prompt([{
             name: 'jobTitle',
             type: 'list',
             message: 'Which employee role would you like to delete?',
             choices: positionTitle
         }]).then(({ jobTitle }) => {
-            // console.log(jobTitle);
-            // console.log(res);
             let filteredTitles = res.filter(title => jobTitle === title.title);
             let titleIdToDelte = filteredTitles[0].id;
 
@@ -314,3 +314,75 @@ function deleteDepartment() {
 
     })
 }
+
+function updateEmployeeRole() {
+    connection.query(`SELECT employee.id, concat(employee.first_name,' ',employee.last_name) AS whole_name, role.title FROM employee JOIN role on employee.role_id = role.id;`, (err, res) => {
+        if (err) throw err;
+        let employeeName = res.map(name => name.whole_name);
+        let response4 = res;
+
+        connection.query('SELECT * FROM corporate_db.role;', (err, response) => {
+            if (err) throw err;
+            let allJobTitles = response.map(job => job.title);
+            let response5 = response;
+
+            inquirer.prompt([{
+                name: 'selectEmp',
+                type: 'list',
+                message: 'Which employee would you like to update?',
+                choices: employeeName
+            }, {
+                name: 'selectRole',
+                type: 'list',
+                message: 'What is the employees new role?',
+                choices: allJobTitles
+            }]).then(({ selectEmp, selectRole }) => {
+                let employeeObj = response4.filter(name => name.whole_name === selectEmp);
+                let employeeId = employeeObj[0].id;
+
+                let empRoleId = response5.filter(id => id.title === selectRole);
+                const jobRoleId = empRoleId[0].id;
+
+                connection.query('UPDATE employee SET ? WHERE ?', [
+                    { role_id: jobRoleId },
+                    { id: employeeId }
+                ], err => {
+                    if (err) throw err;
+                    console.log(`\n✨ Employee named ${selectEmp}'s role was updated to ${selectRole}! ✨\n`);
+                    start();
+
+                })
+            })
+        })
+    })
+
+};
+
+// function updateEmpManager() {
+//     connection.query(`SELECT employee.id, concat(employee.first_name,' ',employee.last_name) AS whole_name, role.title FROM employee JOIN role on employee.role_id = role.id;`, (err, res) => {
+//         if (err) throw err;
+//         let employeeName = res.map(name => name.whole_name);
+//         let response4 = res;
+
+//         connection.query('SELECT * FROM corporate_db.role;', (err, response) => {
+//             if (err) throw err;
+//             let allJobTitles = response.map(job => job.title);
+//             let response5 = response;
+
+//             inquirer.prompt([{
+//                 name: 'selectEmp',
+//                 type: 'list',
+//                 message: 'Which employee would you like to update the manager for?',
+//                 choices: employeeName
+//             }, {
+//                 name: 'selectRole',
+//                 type: 'list',
+//                 message: 'Who is the employees new boss?',
+//                 choices: allJobTitles
+//             }]).then(({ selectEmp, selectRole }) => {
+
+
+//             })
+//         })
+//     })
+// };
