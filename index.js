@@ -89,7 +89,7 @@ function handleRespose(answers) {
             break;
 
         case 'Update Employee Manager':
-            // updateEmpManager();
+            updateEmpManager();
             break;
 
         case 'Exit':
@@ -104,10 +104,11 @@ function handleRespose(answers) {
 }
 
 function viewEmployees() {
-    connection.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name as Department, role.salary 
+    connection.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name as Department, role.salary, concat( e2.first_name,' ',e2.last_name) AS Manager
     FROM employee 
     LEFT JOIN role on employee.role_id = role.id
-    LEFT JOIN department on role.department_id = department.id;`, (err, res) => {
+    LEFT JOIN department on role.department_id = department.id
+    LEFT JOIN employee AS e2 on e2.id=employee.manager_id ;`, (err, res) => {
         if (err) throw err;
         const table = cTable.getTable(res);
         console.log(table);
@@ -358,31 +359,45 @@ function updateEmployeeRole() {
 
 };
 
-// function updateEmpManager() {
-//     connection.query(`SELECT employee.id, concat(employee.first_name,' ',employee.last_name) AS whole_name, role.title FROM employee JOIN role on employee.role_id = role.id;`, (err, res) => {
-//         if (err) throw err;
-//         let employeeName = res.map(name => name.whole_name);
-//         let response4 = res;
+function updateEmpManager() {
+    connection.query(`SELECT employee.id, concat(employee.first_name,' ',employee.last_name) AS EMP_full_name, role.title, department.name as Department, role.salary, concat( e2.first_name,' ',e2.last_name) AS Manager
+    FROM employee 
+    LEFT JOIN role on employee.role_id = role.id
+    LEFT JOIN department on role.department_id = department.id
+    LEFT JOIN employee AS e2 on e2.id=employee.manager_id ;`, (err, res) => {
+        if (err) throw err;
+        let employeeName = res.map(name => name.EMP_full_name);
 
-//         connection.query('SELECT * FROM corporate_db.role;', (err, response) => {
-//             if (err) throw err;
-//             let allJobTitles = response.map(job => job.title);
-//             let response5 = response;
+        inquirer.prompt([{
+            name: 'selectEmp',
+            type: 'list',
+            message: 'Which employee would you like to update the manager for?',
+            choices: employeeName
+        }]).then(({ selectEmp }) => {
+            inquirer.prompt([{
+                name: 'selectManager',
+                type: 'list',
+                message: 'Who is the employees new boss?',
+                choices: employeeName.filter(managers => managers !== selectEmp)
+            }]).then(({ selectManager }) => {
+                let employeeToUpdateId = res.filter(name => name.EMP_full_name === selectEmp);
+                employeeToUpdateId = employeeToUpdateId[0].id;
+                let managerSelectedId = res.filter(name => name.EMP_full_name === selectManager);
+                managerSelectedId = managerSelectedId[0].id;
 
-//             inquirer.prompt([{
-//                 name: 'selectEmp',
-//                 type: 'list',
-//                 message: 'Which employee would you like to update the manager for?',
-//                 choices: employeeName
-//             }, {
-//                 name: 'selectRole',
-//                 type: 'list',
-//                 message: 'Who is the employees new boss?',
-//                 choices: allJobTitles
-//             }]).then(({ selectEmp, selectRole }) => {
+                const managerUpdated = [{
+                    manager_id: managerSelectedId
+                }, {
+                    id: employeeToUpdateId
+                }];
 
+                connection.query('UPDATE employee SET ? WHERE ?', managerUpdated, (err, response) => {
+                    if (err) throw err;
+                    console.log(`\n✨ Employee named ${selectEmp}'s manager was updated to ${selectManager}! ✨\n`);
+                    start();
+                });
+            });
+        });
 
-//             })
-//         })
-//     })
-// };
+    });
+};
