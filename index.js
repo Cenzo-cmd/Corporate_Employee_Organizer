@@ -53,11 +53,11 @@ function handleRespose(answers) {
             break;
 
         case 'View Employees By Department':
-            // viewEmpByDept();
+            viewEmpByDept();
             break;
 
         case 'View Employees By Manager':
-            console.log('view emp by manger');
+            // viewEmployeesByManager();
             break;
 
         case 'Add Employee':
@@ -117,8 +117,41 @@ function viewEmployees() {
 }
 
 function viewEmpByDept() {
+    connection.query('SELECT * FROM corporate_db.department', (err, res) => {
+        if (err) throw err;
+        const departmentsToChoose = res.map(dept => dept.name);
+        console.log(res);
 
+        inquirer.prompt([{
+            name: 'selectDept',
+            type: 'list',
+            message: 'Which department would you like to view employees for?',
+            choices: departmentsToChoose
+        }]).then(({ selectDept }) => {
+            let departmentChosenId = res.filter(dept => dept.name === selectDept);
+            departmentChosenId = departmentChosenId[0].id;
+
+            connection.query(`SELECT first_name, last_name, title, salary FROM employee
+            RIGHT JOIN role ON employee.role_id = role.id WHERE department_id = ?;`, departmentChosenId, (err, response) => {
+                if (err) throw err;
+
+                if (response.length === 0) {
+                    console.log(`\n✨ There are no employees for department: ${selectDept} currently! ✨\n`);
+                    start();
+                    return;
+                };
+                const table = cTable.getTable(response);
+                console.log(table);
+                console.log(`\n✨ Employee's for department: ${selectDept} are displayed! ✨\n`);
+                start();
+            });
+        });
+    });
 }
+
+function viewEmployeesByManager() {
+
+};
 
 function addEmployee() {
     connection.query(`SELECT employee.id as employee_id, concat(employee.first_name,' ',employee.last_name) as full_name,role.id as role_id, role.title FROM employee LEFT JOIN role on employee.role_id = role.id;`, (err, res) => {
