@@ -4,7 +4,7 @@
 
 
 
-> This app was created to simply manage employees for a company, no matter how large it is.  This app is ran through node.js.  Since this is ran through node.js, this app cannot be deployed on a url.  Please click on the image to see the functionality.
+> This app was created to simply manage employees for a company, no matter how large it is.  This app is run through node.js.  Since this is run through node.js, this app cannot be deployed on a url.  Please click on the images to see the functionality.
 
 [![Video 1](./assets/img/schema.png)](https://drive.google.com/file/d/1pijiEnBECI4Fqc7KEIobzRl9QCqSMykf/view)
 
