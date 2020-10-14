@@ -10,16 +10,16 @@
 
 ## Install
 
-```sh
+
 Please run an npm install to install the files in the package.json file.  When all dependies are installed, simply run node index.js and the command line will allow you to choose from a list of functions to create, edit and modify information for an employee.
-```
+
 
 [![Video 2](./assets/img/viewEmp.png)](https://drive.google.com/file/d/1AyaM95KAv392JiddNApL5c29wSxkY0Ap/view)
 ## Usage
 
-```sh
+
 This app is used to keep all your employees organized for a company.  You can add, update and delete departments, roles and employee information.  All information will store in a database, there are 2 sql files that will setup and add seed data to your database.
-```
+
 
 
 [![Video 3](./assets/img/jsFiles.png)](https://drive.google.com/file/d/1J7BCMbEfkUPBiYZQhOpboXfKruB_aba3/view)
