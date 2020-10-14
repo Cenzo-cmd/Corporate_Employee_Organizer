@@ -9,7 +9,7 @@
 ## Install
 
 ```sh
-npm install
+Please run an npm install to install the files in the package.json file.
 ```
 
 ## Usage
