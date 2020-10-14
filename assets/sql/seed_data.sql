@@ -4,7 +4,7 @@ VALUES
 ('Sales'),
 ('Legal'),
 ('Technology'),
-('Board of Directors'),
+('Board of Directors');
 
 INSERT INTO `role` (title, salary, department_id)
 VALUES  

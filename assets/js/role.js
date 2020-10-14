@@ -7,7 +7,6 @@ function addRole() {
         if (err) throw err;
         let departments = res.map(name => name.name);
         let response3 = res;
-        console.log(response3);
 
         inquirer.prompt([{
             name: 'roleTitle',
@@ -19,14 +18,13 @@ function addRole() {
             message: 'What is the salary for this role?'
         }, {
             name: 'roleDepartment',
-            type: 'list',
+            type: 'rawlist',
             message: 'Which department is the role in?',
             choices: departments
         }]).then(({ roleTitle, roleSalary, roleDepartment }) => {
 
             let departmentId = response3.filter(dept => roleDepartment === dept.name);
             departmentId = departmentId[0].id;
-            console.log(departmentId);
             let newRole = {
                 title: roleTitle,
                 salary: roleSalary,
@@ -52,7 +50,7 @@ function deleteRole() {
 
         inquirer.prompt([{
             name: 'jobTitle',
-            type: 'list',
+            type: 'rawlist',
             message: 'Which employee role would you like to delete?',
             choices: positionTitle
         }]).then(({ jobTitle }) => {

@@ -4,7 +4,6 @@ const start = require('./prompts');
 const cTable = require('console.table');
 
 function viewEmployees() {
-    console.log('Viewing employees');
     connection.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name as Department, role.salary, concat( e2.first_name,' ',e2.last_name) AS Manager
     FROM employee 
     LEFT JOIN role on employee.role_id = role.id
@@ -15,7 +14,7 @@ function viewEmployees() {
         console.log(table);
         start.start();
     });
-}
+};
 
 function viewEmpByDept() {
     connection.query('SELECT * FROM corporate_db.department', (err, res) => {
@@ -24,7 +23,7 @@ function viewEmpByDept() {
 
         inquirer.prompt([{
             name: 'selectDept',
-            type: 'list',
+            type: 'rawlist',
             message: 'Which department would you like to view employees for?',
             choices: departmentsToChoose
         }]).then(({ selectDept }) => {
@@ -37,7 +36,7 @@ function viewEmpByDept() {
 
                 if (response.length === 0) {
                     console.log(`\n✨ There are no employees for department: ${selectDept} currently! ✨\n`);
-                    start();
+                    start.start();
                     return;
                 };
                 const table = cTable.getTable(response);
@@ -47,7 +46,7 @@ function viewEmpByDept() {
             });
         });
     });
-}
+};
 
 function viewEmployeesByManager() {
     connection.query(`SELECT CONCAT(e2.first_name, " ", e2.last_name) AS Manager, e1.id AS EMPID, e1.first_name AS First_Name, e1.last_name AS Last_Name, role.title AS Title, department.name AS Department, role.salary AS Salary FROM employee AS e1
@@ -65,58 +64,62 @@ function viewEmployeesByManager() {
 };
 
 function addEmployee() {
+
+
     connection.query(`SELECT employee.id as employee_id, concat(employee.first_name,' ',employee.last_name) as full_name,role.id as role_id, role.title FROM employee LEFT JOIN role on employee.role_id = role.id;`, (err, res) => {
         if (err) throw err;
-
-        let empChoices = res.map(title => title.title);
         let managerChoices = res.map(name => name.full_name);
         const response1 = res;
+        connection.query(`SELECT * FROM corporate_db.role;`, (error, response) => {
+            if (error) throw error;
+            let empChoices = response.map(title => title.title);
 
-        inquirer.prompt([{
-            name: 'firstName',
-            type: 'input',
-            message: 'What is the employees first name?'
-        }, {
-            name: 'lastName',
-            type: 'input',
-            message: 'What is the employees last name?'
-        }, {
-            name: 'employeeRole',
-            type: 'list',
-            message: 'What is the employees role?',
-            choices: empChoices
-        }, {
-            name: 'manager',
-            type: 'list',
-            message: 'Who is the manager for the new employee?',
-            choices: managerChoices
+            inquirer.prompt([{
+                name: 'firstName',
+                type: 'input',
+                message: 'What is the employees first name?'
+            }, {
+                name: 'lastName',
+                type: 'input',
+                message: 'What is the employees last name?'
+            }, {
+                name: 'employeeRole',
+                type: 'rawlist',
+                message: 'What is the employees role?',
+                choices: empChoices
+            }, {
+                name: 'manager',
+                type: 'rawlist',
+                message: 'Who is the manager for the new employee?',
+                choices: managerChoices
 
-        }]).then(({ firstName, lastName, employeeRole, manager }) => {
+            }]).then(({ firstName, lastName, employeeRole, manager }) => {
 
-            let newEmpId = response1.filter(value => employeeRole === value.title);
-            newEmpId = (newEmpId[0].role_id);
+                let newEmpId = response1.filter(value => employeeRole === value.title);
+                newEmpId = (newEmpId[0].role_id);
 
-            let newEmpManagerId = response1.filter(name => manager === name.full_name);
-            newEmpManagerId = (newEmpManagerId[0].employee_id);
+                let newEmpManagerId = response1.filter(name => manager === name.full_name);
+                newEmpManagerId = (newEmpManagerId[0].employee_id);
 
-            const newEmployee = {
-                first_name: firstName,
-                last_name: lastName,
-                role_id: newEmpId,
-                manager_id: newEmpManagerId
-            };
+                const newEmployee = {
+                    first_name: firstName,
+                    last_name: lastName,
+                    role_id: newEmpId,
+                    manager_id: newEmpManagerId
+                };
 
-            connection.query('INSERT INTO employee SET ?', newEmployee, err => {
-                if (err) throw err;
+                connection.query('INSERT INTO employee SET ?', newEmployee, err => {
+                    if (err) throw err;
 
-                console.log(`\n✨ Your new employee ${firstName} ${lastName} was created! ✨\n`);
+                    console.log(`\n✨ Your new employee ${firstName} ${lastName} was created! ✨\n`);
 
-                start.start();
+                    start.start();
+                });
             });
         });
     });
 
-}
+};
 
 function deleteEmployee() {
     connection.query(`SELECT employee.id, concat(employee.first_name,' ',employee.last_name) AS whole_name, employee.role_id, employee.manager_id FROM corporate_db.employee;`, (err, res) => {
@@ -127,11 +130,10 @@ function deleteEmployee() {
 
         inquirer.prompt([{
             name: 'empName',
-            type: 'list',
+            type: 'rawlist',
             message: 'Select an Employee to delete',
             choices: employeeToDelete
         }]).then(({ empName }) => {
-            console.log('this is the employee name', empName);
             const employeeToBeDeleted = deleteResponse.filter(name => name.whole_name === empName);
             const employeeIdToDelete = employeeToBeDeleted[0].id;
 
@@ -159,12 +161,12 @@ function updateEmployeeRole() {
 
             inquirer.prompt([{
                 name: 'selectEmp',
-                type: 'list',
+                type: 'rawlist',
                 message: 'Which employee would you like to update?',
                 choices: employeeName
             }, {
                 name: 'selectRole',
-                type: 'list',
+                type: 'rawlist',
                 message: 'What is the employees new role?',
                 choices: allJobTitles
             }]).then(({ selectEmp, selectRole }) => {
@@ -200,13 +202,13 @@ function updateEmpManager() {
 
         inquirer.prompt([{
             name: 'selectEmp',
-            type: 'list',
+            type: 'rawlist',
             message: 'Which employee would you like to update the manager for?',
             choices: employeeName
         }]).then(({ selectEmp }) => {
             inquirer.prompt([{
                 name: 'selectManager',
-                type: 'list',
+                type: 'rawlist',
                 message: 'Who is the employees new boss?',
                 choices: employeeName.filter(managers => managers !== selectEmp)
             }]).then(({ selectManager }) => {

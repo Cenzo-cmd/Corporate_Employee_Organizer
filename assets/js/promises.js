@@ -4,10 +4,8 @@ const department = require('./department');
 const connection = require('./connection');
 
 function handleResponse(answers) {
-    console.log('this is the answer', answers);
     switch (answers.mainMenu) {
         case 'View Employees':
-            console.log('This is the view employees');
             emp.viewEmp();
             break;
 

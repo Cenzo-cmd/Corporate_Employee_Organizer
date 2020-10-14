@@ -6,11 +6,12 @@ const cTable = require('console.table');
 
 function viewTotalBudget() {
     connection.query(` SELECT * FROM department;`, (err, res) => {
+
         const departmentsListed = res.map(name => name.name);
 
         inquirer.prompt([{
             name: 'departmentList',
-            type: 'list',
+            type: 'rawlist',
             message: 'Which department would you like to see the budget for?',
             choices: departmentsListed
         }]).then(({ departmentList }) => {
@@ -58,7 +59,7 @@ function deleteDepartment() {
 
         inquirer.prompt([{
             name: 'departmentName',
-            type: 'list',
+            type: 'rawlist',
             message: 'Which department would you like to delete?',
             choices: departmentChoices
         }]).then(({ departmentName }) => {
