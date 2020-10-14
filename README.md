@@ -1,4 +1,4 @@
-# Welcome to Corporate_Employee_Tracker 👋
+# 🏙 Welcome to Corporate_Employee_Tracker 🏙
 [![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)](https://drive.google.com/file/d/1AyaM95KAv392JiddNApL5c29wSxkY0Ap/view)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
 
@@ -29,7 +29,5 @@ This app is used to keep all your employees organized for a company.  You can ad
 
 * GitHub: [@Cenzo-cmd](https://github.com/Cenzo-cmd)
 
-## Show your support
 
-Give a ⭐️ if this project helped you!
 
